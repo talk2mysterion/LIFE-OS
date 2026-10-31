@@ -1,13 +1,13 @@
 {
-  "name": "LIFE OS — Personal Operating System",
-  "short_name": "LIFE OS",
-  "description": "A lightweight, customisable personal operating system",
+  "name": "ADAYN — Make every day count",
+  "short_name": "ADAYN",
+  "description": "A flexible personal planning and life-management workspace",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#f5f5f3",
-  "theme_color": "#ff7417",
+  "theme_color": "#111111",
   "icons": [
     {"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
   ]
