@@ -1,55 +1,59 @@
-# LIFE OS V4 — zero-subscription launch guide
+# ADAYN — setup and launch guide
 
-## 1. What you can launch for free
+## What we have changed
+The application is now branded ADAYN. The account-first screen requires users to sign in or create an account, and the planner stays behind the account screen until Firebase confirms the email address is verified. Registration includes a verification email, resend action, password reset and clearer error messages.
 
-The first release is a static installable PWA. Publish it on GitHub Pages using a public repository and its free `github.io` address. Use Firebase's Spark (no-cost) plan for eligible email authentication and Firestore usage. Do not add a custom domain, paid hosting, a paid API or Play Store distribution for the first release.
+The existing Firebase web configuration and planner storage key have been preserved. The storage key is still `lifeos_custom_v2`; do not rename it, because existing browser data may depend on it.
 
-Free tiers have quotas and provider terms can change. This is a no-subscription launch plan, not a promise of zero costs forever. If a Firebase quota is exhausted, cloud features may stop until the quota resets; local use and manual backups remain available.
+## 1. GitHub is the source-code home
+The repository is:
+https://github.com/talk2mysterion/LIFE-OS
 
-## 2. Prepare Firebase
+GitHub stores the code and its history. It does not by itself configure Firebase Authentication, Firestore or production hosting. These steps are separate.
 
-1. Visit <https://console.firebase.google.com/> and create a project.
-2. Register a Web App inside the project.
-3. Copy the web configuration values into `firebase-config.js` (`apiKey`, `authDomain`, `projectId`, `appId`). These values identify the public web app. Never paste a service-account JSON file or private key.
-4. Open **Authentication → Sign-in method** and enable **Email/Password**.
-5. Open **Authentication → Settings → Authorized domains** and add the exact hostname that GitHub Pages will use, such as `yourname.github.io`.
-6. Open **Firestore Database** and create a database. After it is created, open the Rules tab and publish the contents of `firestore.rules` from this folder.
-7. Confirm the project remains on the Spark plan. Do not enable billing/Blaze for this zero-subscription launch.
+## 2. Firebase checklist (requires Firebase Console access)
+1. Open https://console.firebase.google.com/ and select the existing project.
+2. Open **Authentication → Sign-in method** and enable **Email/Password**.
+3. Open **Authentication → Settings → Authorized domains** and add the exact hostname where ADAYN will be hosted.
+4. Open **Firestore Database**. Create the database if needed.
+5. Open the Firestore **Rules** tab and publish the contents of `firestore.rules`.
+6. Open **Authentication → Templates → Email address verification** and confirm the verification email is enabled and its action link is valid.
+7. Keep the project on the Spark plan if you want to stay within eligible no-cost quotas. Do not enable billing unless you intentionally choose a paid plan.
 
-## 3. Publish on GitHub Pages
+The Firebase web configuration in `firebase-config.js` is already populated in the repository. Preserve it. It is not a service-account credential. Never upload service-account JSON, private keys or admin credentials.
 
-1. Sign in to GitHub and create a **public** repository named `life-os-app`.
-2. Upload all files in this folder, keeping them at the repository root: `index.html`, `manifest.json`, `sw.js`, `icon.svg`, `firebase.js`, `firebase-config.js`, `firestore.rules`, `README.txt`, and this guide.
-3. Commit the files to the `main` branch.
-4. Open repository **Settings → Pages**.
-5. Under Build and deployment, choose **Deploy from a branch**, select `main` and `/(root)`, then save.
-6. Wait for GitHub Pages to publish. Open the HTTPS URL shown in Pages.
-7. Add the published hostname to Firebase Authentication's Authorized domains.
-8. Reload the website. The account status should move from “Firebase setup pending” to “Ready”.
+## 3. Hosting
+Use GitHub as the source repository and deploy the app to a host whose terms allow the intended commercial use. Firebase Hosting or another suitable static-app host can be selected once the hosting project and deployment access are ready. Do not assume GitHub Pages is the long-term hosting choice for a commercial SaaS product.
 
-## 4. Test before inviting users
+The app must be served over HTTPS for secure sign-in and PWA installation. After deployment, add the exact hostname to Firebase Authentication's Authorized domains.
 
-- Create a test account using an email you control. Confirm the verification email arrives.
+## 4. Test email verification before inviting users
+- Create a test account using an email address you can access.
+- Check Inbox, Spam/Junk and Promotions for the verification email.
+- In Firebase Console → Authentication → Users, confirm the account exists.
+- If the account exists but is unverified, return to ADAYN and choose **Resend verification email**.
+- Open the verification link, return to ADAYN and choose **I've verified my email**.
 - Sign out, sign in again and test password reset.
-- Add a test activity and goal. Confirm local use works after switching the device to airplane mode.
-- Sign back in online. Confirm the sync indicator reports that cloud sync is connected.
-- Open the same account on a second browser/device. Confirm the workspace appears there.
-- Test with two different accounts and verify each account sees only its own data.
-- Export a JSON backup, then test importing it into a separate test profile/browser.
-- Export an `.ics` file and import it into a test Google Calendar. Set a test notification and verify it reaches the device.
+- If Firebase reports `auth/unauthorized-domain`, add the exact deployed hostname to Authorized domains.
+- If Firebase reports `auth/operation-not-allowed`, enable Email/Password in Authentication.
+- If the app appears stale after an update, hard-refresh the browser (Ctrl + Shift + R).
 
-## 5. Google Calendar reminders
+## 5. Test data and sync
+- Add a test activity and goal.
+- Export a JSON backup and verify that it downloads.
+- Sign in on a second browser/device and confirm the same workspace appears.
+- Test two different accounts and verify each account sees only its own data.
+- Test Firestore rules before public launch.
+- Keep manual backups. This version syncs one complete workspace document per user; simultaneous edits can overwrite the other device's latest full workspace (last-write-wins), rather than merging individual fields.
 
-LIFE OS exports the selected day's tasks as a calendar file. It does not yet maintain a two-way Google Calendar connection. Import the `.ics` file into Google Calendar, then configure event notifications in Google Calendar and allow notifications on Android. If a task changes later, export and import the updated calendar file again; avoid importing duplicates repeatedly.
+## 6. Google Calendar
+Select a date in ADAYN and export its activities as an .ics file. Import it into Google Calendar and configure event notifications there. This is a one-time export, not two-way live calendar sync. Re-export after schedule changes.
 
-## 6. Privacy and public launch readiness
+## 7. Before public launch
+- Publish a privacy policy and support/contact page.
+- Explain local storage, cloud sync, backup, account deletion and data retention.
+- Do not send journal entries, relationship notes, personal schedules or other private workspace content to advertising systems.
+- Test on desktop Chrome and Android Chrome. Use the browser's **Install app** or **Add to Home screen** option to install the PWA.
 
-Before public promotion, write a plain-language privacy policy and support/contact page. Explain that data is stored locally and, when signed in, synced to Firebase. Explain how users can export backups and request account/data deletion. Test Firestore access rules with two accounts. Never publish private credentials. Keep journals, prayer notes, relationships and personal schedules private; do not send this content to ad platforms.
-
-## 7. Storage and performance
-
-The app is a small static PWA. It caches only its local app shell and uses browser local storage for the workspace. It cannot consume literally zero storage: installed app files, cached files and user data need some space. Keep images and external libraries out of the first release to keep it lean.
-
-## 8. Current V4 sync limitation
-
-V4 syncs one workspace document per user. This keeps the first release small and simple, but Firestore document-size limits apply. If two devices edit at nearly the same time, the most recently synced complete workspace can replace the other copy; this version does not yet merge individual fields. Encourage users to avoid editing the same account simultaneously on multiple devices and retain manual backups. A later scale-up should split routines, journal entries, goals and daily records into separate documents with conflict-aware timestamps.
+## 8. Free-tier limits
+The app code and PWA installation can start without a subscription. Firebase Spark includes free quotas for eligible services, but limits and provider terms can change. Domain registration, app-store distribution, payment processing and increased infrastructure usage may cost money. Do not promise users that cloud service will remain free forever.
