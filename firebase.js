@@ -6,6 +6,7 @@ const LOCAL_KEY = 'lifeos_custom_v2'; // Preserve existing planner data.
 let auth, cloudDb, activeUser = null, unsubscribe = null, pending = null, timer = null, applyingRemote = false, activeUid = null, busy = false;
 const status = message => { $('authStatus').textContent = message; };
 const setAppVisible = (yes, email='') => {
+  document.body.classList.toggle('authenticated', yes);
   $('authModal').classList.toggle('hidden', yes);
   $('closeAuth').classList.toggle('hidden', !yes);
   $('signOutBtn').classList.toggle('hidden', !yes);
